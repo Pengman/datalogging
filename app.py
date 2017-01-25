@@ -9,7 +9,8 @@ app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT' #NOT SECRET!!!
 def index():
     links = [
         (u'Vægt', url_for('vaegt')),
-        (u'Søvn', url_for('soevn'))
+        (u'Søvn', url_for('soevn')),
+        (u'Bank', url_for('bank'))
         ]
 
     return render_template('index.html', links = links)
@@ -33,3 +34,11 @@ def soevn():
         return redirect(url_for('index'))
     else:
         return render_template('soevn.html')
+
+@app.route('/bank', methods=['GET', 'POST'])
+def bank():
+    if request.method == 'POST':
+        # do_the_login()
+        app.logging.debug("@return")
+    else:
+        return render_template('bank.html')
