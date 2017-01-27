@@ -7,6 +7,33 @@
 {% block content %}
 
 <div class="container">
+
+  <div class="row">
+    <div class="col-md-5 col-md-offset-1">
+        <div class="form-group">
+           <div class="input-group date" id="datetimepicker7" data-target-input="nearest">
+                <input type="text" class="form-control datetimepicker-input"
+                data-target="#datetimepicker7" placeholder="Fra dato"/>
+                <span class="input-group-addon" data-target="#datetimepicker7" data-toggle="datetimepicker">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="form-group">
+           <div class="input-group date" id="datetimepicker8" data-target-input="nearest">
+                <input type="text" class="form-control datetimepicker-input"
+                data-target="#datetimepicker8"  placeholder="Til dato"/>
+                <span class="input-group-addon" data-target="#datetimepicker8" data-toggle="datetimepicker">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  
   <div class="row">
 
     <div class="col-md-4 col-md-push-8">
@@ -16,10 +43,10 @@
     </div>
 
     <div class="col-md-8 col-md-pull-4">
-      <table class="table table-bordered table-condensed">
+      <table id="money_table" class="table table-bordered table-condensed">
 	<tr><th>Dato</th><th>Beskrivelse</th><th>Bel&oslash;b</th><th>Kategorier</th><th>Saldo efter</th></tr>
 
-	<tr><td>Dato</td><td>Kvickly</td><td>650.00kr</td><td><a data-toggle="collapse"
+	<tr class="linie"><td>Dato</td><td>Kvickly</td><td><span class="linie_beloeb">650.00</span>kr</td><td><a data-toggle="collapse"
 	data-target=".collapse1">Mad <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a></td><td>&nbsp;</td></tr>
 
 	<tr class="info collapse collapse1"><td>&nbsp;</td>
@@ -32,18 +59,19 @@
 	      <option>Dyrene</option>
 	    </select>
 	  </td><td>
-	  <input type="number" class="form-control" placeholder="Bel&oslash;b">
+	  <input type="number" class="form-control kategori_beloeb"
+	  placeholder="Bel&oslash;b" value="650">
 	  </td>
 	  <td>
-	    <button class="btn btn-default btn-sm"><span class="glyphicon
-	    glyphicon-plus" aria-hidden="true"></span>Tilf&oslash;j
+	    <button class="btn btn-default btn-sm peng-add-kategori-button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Tilf&oslash;j
 	      kategori</button><td>&nbsp;</td>
 	  </td>
 	</tr>
+	
 	<tr class="active collapse collapse1">
 	  <td>&nbsp;</td>
 	  <td>Rest</td>
-	  <td class="warning">Bel&oslash;b</td>
+	  <td class="kategori_total">Bel&oslash;b</td>
 	    <td>
 	      <button class="btn btn-primary btn-sm">
 		<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Gem kategorier</button>
@@ -51,13 +79,82 @@
 	    <td>&nbsp;</td>
 	  </tr>
 
-	<tr><td>Dato</td><td>Beskrivelse</td><td>1286,00 kr.</td><td>Kategorier</td><td>&nbsp;</td></tr>
-	<tr><td>Dato</td><td>Beskrivelse</td><td>250,00 kr.</td><td>Kategorier</td><td>&nbsp;</td></tr>
+	<tr class="linie"><td>Dato</td><td>Beskrivelse</td><td>1286,00 kr.</td><td>Kategorier</td><td>&nbsp;</td></tr>
+	<tr class="linie"><td>Dato</td><td>Beskrivelse</td><td>250,00 kr.</td><td>Kategorier</td><td>&nbsp;</td></tr>
 
       </table>
     </div>
     
   </div>
 </div>
-    
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$(function() {
+console.log( "ready!" );
+
+$('#money_table')
+.on('click','.peng-add-kategori-button', function(a)
+{
+//console.log('click');
+//console.log(this);
+
+var clicked_row = $(this).parents('tr');
+console.log(clicked_row);
+$( clicked_row ).clone().insertAfter( clicked_row ).find( ':input' ).val( '' );
+
+//console.log(a);
+})
+.on('input','.kategori_beloeb', function(a){
+console.log('beloeb changed to ' + $(this).val());
+var linie_belob = parseFloat($(this).parents('tr').prevAll('.linie').find('.linie_beloeb').text());
+console.log(linie_belob);
+
+//console.log();
+//$(this).parents('tr')).nextUntil('');//.find('.kategori_beloeb'));
+//$(this).parents('tr').nextUntil('.linie').find('.kategori_beloeb')
+
+var kategori_linier = $(this).parents('tr').prevAll('.linie').nextUntil('.linie');
+
+// beregn ny sum
+var sum = 0.0;
+kategori_linier.find('.kategori_beloeb').each(function() {
+        sum += Number($(this).val());
+    });
+
+if (sum === linie_belob){
+  kategori_linier.last().find('.kategori_total').text("").parent("tr").removeClass("danger warning success").addClass("success");
+  kategori_linier.last().find('.btn').removeClass("disabled");
+} else {
+  var msg = sum > linie_belob ?
+"Der er " + (sum - linie_belob) + " kr. for meget" :
+"Der mangler " + (linie_belob - sum) + " kr.";
+
+  kategori_linier.last().find('.kategori_total').text(msg).parent("tr").removeClass("danger warning success").addClass("danger");
+  kategori_linier.last().find('.btn').addClass("disabled");
+}
+});
+
+$('#datetimepicker7').datetimepicker(
+{
+format: "L",
+locale: "da"
+});
+        $('#datetimepicker8').datetimepicker({
+useCurrent: false,
+format: "L",
+locale: "da"
+});
+
+        $("#datetimepicker7").on("dp.change", function (e) {
+            $('#datetimepicker8').data("DateTimePicker").minDate(e.date);
+        });
+        $("#datetimepicker8").on("dp.change", function (e) {
+            $('#datetimepicker7').data("DateTimePicker").maxDate(e.date);
+        });
+});
+
+</script>
+
 {% endblock %}
