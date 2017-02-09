@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -72,7 +72,9 @@
     <script src="{{ url_for('static', filename='js/moment-with-locales.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/tempusdominus-bootstrap-3.min.js') }}"></script>
 
-      {% block script %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/vue.js') }}"></script>
+
+    {% block script %}{% endblock %}
 
       
   </body>

@@ -11,6 +11,8 @@ def index():
         (u'Vægt', url_for('vaegt')),
         (u'Søvn', url_for('soevn')),
         (u'Bank', url_for('bank'))
+,
+        (u'Bank2', url_for('bank2'))
         ]
 
     return render_template('index.html', links = links)
@@ -42,3 +44,11 @@ def bank():
         app.logging.debug("@return")
     else:
         return render_template('bank.html')
+
+@app.route('/bank2', methods=['GET', 'POST'])
+def bank2():
+    if request.method == 'POST':
+        # do_the_login()
+        app.logging.debug("@return")
+    else:
+        return render_template('bank_vue.html')
