@@ -56,7 +56,7 @@
 
                     <tr v-bind:class="'active collapse collapse' + linie.Id" v-for="kategori in linie.Kategorier">
                         <td>&nbsp;</td>
-                        <td>{{kategori.Kategori}}</td>
+                        <td></td>
                         <td>
                             <select class="form-control" v-model="kategori.Kategori">
                                 <option>(Tom)</option>
@@ -64,68 +64,56 @@
                             </select>
 
                         </td>
-                        <td class="text-right"> <input type="number" class="form-control text-right kategori_beloeb" placeholder="Bel&oslash;b" v-bind:value="(kategori.Beloeb / 100).toFixed(2)" step="0.01" >    {{(kategori.Beloeb / 100).toFixed(2)}} kr.</td>
+                        <td class="text-right">
+			  <input type="number" class="form-control
+						      text-right
+						      kategori_beloeb"
+				 placeholder="Bel&oslash;b"
+				 v-bind:value="(kategori.Beloeb /
+					       100).toFixed(2)" step="0.01">
+			  </td> 
                         <td>{{kategori.Tekst}}</td>
                     </tr>
 
+		    <tr v-bind:class="'active collapse collapse' + linie.Id">
+                        <td>&nbsp;</td>
+                        <td>V&aelig;lg kategori</td>
+                        <td>
+                            <select class="form-control" >
+                                <option>(Tom)</option>
+                                <option v-for="kategori in kategorier" v-bind:value="kategori" >{{kategori}}</option>
+                            </select>
+
+                        </td>
+                        <td class="text-right">
+			  <input type="number" class="form-control
+						      text-right
+						      kategori_beloeb"
+				 placeholder="Bel&oslash;b">
+
+			  </td>
+                        <td>
+			  <button type="button" class="btn btn-default btn-sm"><p class="glyphicon glyphicon-plus"></p>Tilf&oslash;j</button>
+			</td>
+
+		    </tr>
+		    
                     <tr v-bind:class="'info collapse collapse' + linie.Id">
                         <td>&nbsp;</td>
                         <td>Rest</td>
                         <td class="kategori_total">Bel&oslash;b</td>
+                        <td>&nbsp;</td>
                         <td>
                             <button class="btn btn-primary btn-sm">
                                 <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Gem kategorier
                             </button>
                         </td>
-                        <td>&nbsp;</td>
+
                     </tr>
 
                 </template>
                     {% endraw %}
-<tr class="linie">
-                    <td>Dato</td>
-                    <td>Kvickly</td>
-                    <td><span class="linie_beloeb">650.00</span>kr</td>
-                    <td>
-                        <a data-toggle="collapse"
-                           data-target=".collapse666">Mad<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
-                    </td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr class="info collapse collapse666">
-                    <td>&nbsp;</td>
-                    <td>
-                        <select class="form-control">
-                            <option>Mad</option>
-                            <option>Gaver</option>
-                            <option>S'ren</option>
-                            <option>Merete</option>
-                            <option>Dyrene</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type="number" class="form-control kategori_beloeb" placeholder="Bel&oslash;b" value="650">
-                    </td>
-                    <td>
-                        <button class="btn btn-default btn-sm peng-add-kategori-button">
-                            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Tilf&oslash;j
-                            kategori
-                        </button>
-                    <td>&nbsp;</td>
-                    </td>
-                </tr>
-                <tr class="active collapse collapse666">
-                    <td>&nbsp;</td>
-                    <td>Rest</td>
-                    <td class="kategori_total">Bel&oslash;b</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm">
-                            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Gem kategorier
-                        </button>
-                    </td>
-                    <td>&nbsp;</td>
-                </tr>
-                <tr class="linie"><td>Dato</td><td>Beskrivelse</td><td>250,00 kr.</td><td>Kategorier</td><td>&nbsp;</td></tr>
+
             </table>
         </div>
     </div>
@@ -144,7 +132,7 @@
                 'Kategorier': [
                     { 'Kategori': 'Mad', 'Beloeb': 45000, 'Tekst': '' },
                     { 'Kategori': 'Soren', 'Beloeb': 20000, 'Tekst': 'Stuff' },
-                ]
+                ],
             },
             {
                 'Id': 2,
@@ -158,10 +146,10 @@
             {
                 'Id': 3,
                 'Dato': '3/2-2017',
-                'Beloeb': 5000, //oerer
+                'Beloeb': 50000, //oerer
                 'Beskrivelse': 'Ebay seller',
                 'Kategorier': [
-                    { 'Kategori': 'Soren', 'Beloeb': 5000, 'Tekst': 'webcam' }
+                    { 'Kategori': 'Soren', 'Beloeb': 50000, 'Tekst': 'webcam' }
                 ]
             },
         ]
