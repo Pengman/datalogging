@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask, render_template, url_for, request, flash, redirect
+import peewee
+import flask_admin as admin
+from flask_admin.contrib.peewee import ModelView
+
+import data
+
 app = Flask(__name__)
 
 app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT' #NOT SECRET!!!
