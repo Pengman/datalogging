@@ -6,7 +6,7 @@
 {% endblock %}
 {% block content %}
 
-<div class="container">
+<div class="container" id="app">
 
   <div class="row">
     <div class="col-md-5 col-md-offset-1">
@@ -38,89 +38,86 @@
         <div class="col-md-4 col-md-push-8">
             <div class="well">
                 what is this?
+
             </div>
         </div>
         <div class="col-md-8 col-md-pull-4">
             <table id="money_table" class="table table-bordered table-condensed">
                 <tr><th>Dato</th><th>Beskrivelse</th><th>Kategorier</th><th>Bel&oslash;b</th><th>Saldo efter</th></tr>
-                {% raw %}
-                <template v-for="linie in linier">
-                    <tr class="linie">
-                        <td>{{linie.Dato}}</td>
-                        <td>{{linie.Beskrivelse}}</td>
-
-                        <td><a data-toggle="collapse" v-bind:data-target="'.collapse' + linie.Id">--Kategorier--<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a></td>
-                        <td class="text-right">{{(linie.Beloeb / 100).toFixed(2)}} kr.</td>
-                        <td>&nbsp;</td>
-                    </tr>
-
-                    <tr v-bind:class="'active collapse collapse' + linie.Id" v-for="kategori in linie.Kategorier">
-                        <td>&nbsp;</td>
-                        <td></td>
-                        <td>
-                            <select class="form-control" v-model="kategori.Kategori">
-                                <option>(Tom)</option>
-                                <option v-for="kategori in kategorier" v-bind:value="kategori" >{{kategori}}</option>
-                            </select>
-
-                        </td>
-                        <td class="text-right">
-			  <input type="number" class="form-control
-						      text-right
-						      kategori_beloeb"
-				 placeholder="Bel&oslash;b"
-				 v-bind:value="(kategori.Beloeb /
-					       100).toFixed(2)" step="0.01">
-			  </td> 
-                        <td>{{kategori.Tekst}}</td>
-                    </tr>
-
-		    <tr v-bind:class="'active collapse collapse' + linie.Id">
-                        <td>&nbsp;</td>
-                        <td>V&aelig;lg kategori</td>
-                        <td>
-                            <select class="form-control" >
-                                <option>(Tom)</option>
-                                <option v-for="kategori in kategorier" v-bind:value="kategori" >{{kategori}}</option>
-                            </select>
-
-                        </td>
-                        <td class="text-right">
-			  <input type="number" class="form-control
-						      text-right
-						      kategori_beloeb"
-				 placeholder="Bel&oslash;b">
-
-			  </td>
-                        <td>
-			  <button type="button" class="btn btn-default btn-sm"><p class="glyphicon glyphicon-plus"></p>Tilf&oslash;j</button>
-			</td>
-
-		    </tr>
-		    
-                    <tr v-bind:class="'info collapse collapse' + linie.Id">
-                        <td>&nbsp;</td>
-                        <td>Rest</td>
-                        <td class="kategori_total">Bel&oslash;b</td>
-                        <td>&nbsp;</td>
-                        <td>
-                            <button class="btn btn-primary btn-sm">
-                                <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Gem kategorier
-                            </button>
-                        </td>
-
-                    </tr>
-
-                </template>
-                    {% endraw %}
-
+                
+                <tr is="money-line" v-for="linie in linier" v-bind:linie="linie" :key="linie.Id" v-on:selected="setSelected"> </tr>
             </table>
         </div>
     </div>
+    <div class="modal fade bs-example-modal-sm" tabindex="-1" id="editModal" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <money-line-edit :linie="selected" :kategorier="kategorier"></money-line-edit>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 </div>
+
+                {% raw %}
+<template id="money_line">
+    <tr class="linie">
+        <td>{{linie.Dato}}</td>
+        <td v-on:click="setSelected">{{linie.Beskrivelse}}</td>
+
+        <td>&nbsp;</td>
+        <td class="text-right">{{(linie.Beloeb / 100).toFixed(2)}} kr.</td>
+        <td>&nbsp;</td>
+    </tr>
+</template>
+
+<template id="money_line_edit">
+    <div v-if="linie">
+        <h1 >{{linie.Beskrivelse}}</h1>
+        <table id="money_table" class="table table-bordered table-condensed">
+            <tr><th>Kategori</th><th>Bel&oslash;b</th></tr>
+            <tr v-for="kategori in kategorier">
+                <td>{{kategori}}</td>
+                <td>beloeb</td>
+            </tr>
+
+        </table>
+    </div>
+</template>
+                    {% endraw %}
+
 {% endblock %}
 {% block script %}
 <script type="text/javascript">
+    Vue.component('money-line',  {
+        template: '#money_line',
+        props: ["linie"],
+        methods: {
+            setSelected: function () { this.$emit('selected', this.linie.Id) }
+        }
+    });
+    Vue.component('money-line-edit', {
+        template: '#money_line_edit',
+        props: ['linie', 'kategorier'],
+        data: function () {
+            return {
+                kategori_linier: this.linie.Kategorier,
+                beloeb : this.linie.Beloeb,
+            }
+        },
+        computed: {
+            saldo: function () {
+                var saldo = 0;
+                for (var i in this.kategori_linier) {
+                    saldo = saldo + this.kategori_linier[i].Beloeb;
+                }
+                return saldo;
+            }
+        }
+    })
     var konto = {
         'kategorier': ['Mad','Soren','Merete','Dyrene'],
         'linier': [
@@ -152,32 +149,77 @@
                     { 'Kategori': 'Soren', 'Beloeb': 50000, 'Tekst': 'webcam' }
                 ]
             },
-        ]
+        ],
+        'selected': {}
     };
     var app = new Vue({
-        el: '#money_table',
-        data: konto
+        el: '#app',//'#money_table',
+        data: konto,
+        methods: {
+            setSelected: function (id) {
+                var filtered = this.linier.filter(item => item.Id == id)
+                this.selected = filtered[0];
+                $('#editModal').modal('show');
+            }
+        }
     });
-    /*
-    $(function () {
-        console.log("ready!");
-        $('#datetimepicker7').datetimepicker(
-        {
-            format: "L",
-            locale: "da"
-        });
-        $('#datetimepicker8').datetimepicker({
-            useCurrent: false,
-            format: "L",
-            locale: "da"
-        });
-        $("#datetimepicker7").on("dp.change", function (e) {
-            $('#datetimepicker8').data("DateTimePicker").minDate(e.date);
-        });
-        $("#datetimepicker8").on("dp.change", function (e) {
-            $('#datetimepicker7').data("DateTimePicker").maxDate(e.date);
-        });
-    });
-    */
+
 </script>
 {% endblock %}
+
+<tr v-bind:class="'active collapse collapse' + linie.Id" v-for="kategori in linie.Kategorier">
+    <td>&nbsp;</td>
+    <td></td>
+    <td>
+        <select class="form-control" v-model="kategori.Kategori">
+            <option>(Tom)</option>
+            <option v-for="kategori in kategorier" v-bind:value="kategori">{{kategori}}</option>
+        </select>
+
+    </td>
+    <td class="text-right">
+        <input type="number" class="form-control
+						      text-right
+						      kategori_beloeb"
+               placeholder="Bel&oslash;b"
+               v-bind:value="(kategori.Beloeb /
+					       100).toFixed(2)" step="0.01">
+    </td>
+    <td>{{kategori.Tekst}}</td>
+</tr>
+
+<tr v-bind:class="'active collapse collapse' + linie.Id">
+    <td>&nbsp;</td>
+    <td>V&aelig;lg kategori</td>
+    <td>
+        <select class="form-control">
+            <option>(Tom)</option>
+            <option v-for="kategori in kategorier" v-bind:value="kategori">{{kategori}}</option>
+        </select>
+
+    </td>
+    <td class="text-right">
+        <input type="number" class="form-control
+						      text-right
+						      kategori_beloeb"
+               placeholder="Bel&oslash;b">
+
+    </td>
+    <td>
+        <button type="button" class="btn btn-default btn-sm"><p class="glyphicon glyphicon-plus"></p>Tilf&oslash;j</button>
+    </td>
+
+</tr>
+
+<tr v-bind:class="'info collapse collapse' + linie.Id">
+    <td>&nbsp;</td>
+    <td>Rest</td>
+    <td class="kategori_total">Bel&oslash;b</td>
+    <td>&nbsp;</td>
+    <td>
+        <button class="btn btn-primary btn-sm">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Gem kategorier
+        </button>
+    </td>
+
+</tr>
