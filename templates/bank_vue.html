@@ -43,17 +43,25 @@
         </div>
         <div class="col-md-8 col-md-pull-4">
             <table id="money_table" class="table table-bordered table-condensed">
-                <tr><th>Dato</th><th>Beskrivelse</th><th>Kategorier</th><th>Bel&oslash;b</th><th>Saldo efter</th></tr>
+                <tr><th>Dato</th><th>Konto</th><th>Beskrivelse</th><th>Kategorier</th><th>Bel&oslash;b</th><th>Saldo efter</th></tr>
                 
                 <tr is="money-line" v-for="linie in linier" v-bind:linie="linie" :key="linie.Id" v-on:selected="setSelected"> </tr>
             </table>
         </div>
     </div>
-    <div class="modal fade bs-example-modal-sm" tabindex="-1" id="editModal" role="dialog" aria-labelledby="mySmallModalLabel">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade bs-example-modal-lg" tabindex="-1" id="editModal" role="dialog" aria-labelledby="mySmallModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">Modal title</h4>
+                </div>
                 <div class="modal-body">
                     <money-line-edit :linie="selected" :kategorier="kategorier"></money-line-edit>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
                 </div>
             </div>
         </div>
@@ -64,9 +72,10 @@
 
                 {% raw %}
 <template id="money_line">
-    <tr class="linie">
+    <tr class="linie" v-on:click="setSelected">
         <td>{{linie.Dato}}</td>
-        <td v-on:click="setSelected">{{linie.Beskrivelse}}</td>
+        <td>{{linie.Konto}}</td>
+        <td>{{linie.Beskrivelse}}</td>
 
         <td>&nbsp;</td>
         <td class="text-right">{{(linie.Beloeb / 100).toFixed(2)}} kr.</td>
@@ -78,12 +87,26 @@
     <div v-if="linie">
         <h1 >{{linie.Beskrivelse}}</h1>
         <table id="money_table" class="table table-bordered table-condensed">
-            <tr><th>Kategori</th><th>Bel&oslash;b</th></tr>
-            <tr v-for="kategori in kategorier">
-                <td>{{kategori}}</td>
-                <td>beloeb</td>
+            <tr><th>Kategori</th><th>Bel&oslash;b</th><th>Kommentar</th><th>&nbsp;</th></tr>
+            <tr v-for="kategori in kategori_linier">
+                <td>{{kategori.Kategori}}</td>
+                <td><input v-model="kategori.Beloeb" ></td>
+                <td><input v-model="kategori.Tekst" placeholder="kommentar"></td>
+                <th>&nbsp;</th>
             </tr>
 
+            <tr >
+                <td><input v-model="ny_kategori" placeholder="Ny kategori"></td>
+                <td><input v-model="ny_beloeb"></td>
+                <td><input v-model="ny_tekst" placeholder="kommentar"></td>
+                <td><button class="btn btn-sm" v-on:click="tilfoejKategori">Tilf&oslash;j kategori</button></td>
+            </tr>
+            <tr>
+                <td>Saldo</td>
+                <td>{{saldo}}</td>
+                <td>{{saldo_beskrivelse}}</td>
+                <td>{{(saldo / 100).toFixed(2)}} kr.</td>
+            </tr>
         </table>
     </div>
 </template>
@@ -99,22 +122,69 @@
             setSelected: function () { this.$emit('selected', this.linie.Id) }
         }
     });
+
     Vue.component('money-line-edit', {
         template: '#money_line_edit',
         props: ['linie', 'kategorier'],
         data: function () {
             return {
-                kategori_linier: this.linie.Kategorier,
-                beloeb : this.linie.Beloeb,
+                kategori_linier: [],//this.linie.Kategorier,
+                beloeb: this.linie.Beloeb,
+                ny_kategori: null,
+                ny_beloeb: null,
+                ny_tekst: null,
             }
         },
         computed: {
             saldo: function () {
                 var saldo = 0;
                 for (var i in this.kategori_linier) {
-                    saldo = saldo + this.kategori_linier[i].Beloeb;
+                    var beloeb =  parseInt( this.kategori_linier[i].Beloeb,10);
+                    if (! isNaN(beloeb)) {
+                        saldo = saldo + beloeb;
+                    }
                 }
                 return saldo;
+            },
+            saldo_beskrivelse: function () {
+                if (this.saldo > this.linie.Beloeb) {
+                    return "(For stort)";
+                }
+                if (this.saldo < this.linie.Beloeb) {
+                    return "(For lille)";
+                }
+                return "";
+
+            }
+        },
+        watch: {
+            'linie': function (a, b, c) {
+                this.update_kategorilinier();
+            }
+        },
+        methods: {
+            tilfoejKategori: function () {
+                //console.log(this.ny_kategori);
+                //console.log(this.ny_beloeb);
+                //console.log(this.ny_tekst);
+                this.kategorier.push(this.ny_kategori);
+                this.linie.Kategorier.push({ Kategori: this.ny_kategori, Beloeb: this.ny_beloeb, Tekst: this.ny_tekst });
+                this.update_kategorilinier();
+                
+                this.ny_kategori = this.ny_beloeb = this.ny_tekst = null;
+            },
+            update_kategorilinier: function () {
+                this.kategori_linier = [];
+                for (var i in this.kategorier) {
+                    var kat = this.kategorier[i];
+                    var matching = this.linie.Kategorier.filter(l => l.Kategori === kat);
+                    if (matching[0]) {
+
+                        this.kategori_linier.push({ Kategori: kat, Beloeb: matching[0].Beloeb, Tekst: matching[0].Tekst });
+                    } else {
+                        this.kategori_linier.push({ Kategori: kat, Beloeb: null, Tekst: null });
+                    }
+                }
             }
         }
     })
@@ -126,6 +196,7 @@
                 'Dato': '1/2-2017',
                 'Beloeb': 65000, //oerer
                 'Beskrivelse': 'Kvickly',
+                'Konto': 'Lonkonto',
                 'Kategorier': [
                     { 'Kategori': 'Mad', 'Beloeb': 45000, 'Tekst': '' },
                     { 'Kategori': 'Soren', 'Beloeb': 20000, 'Tekst': 'Stuff' },
@@ -136,6 +207,7 @@
                 'Dato': '2/2-2017',
                 'Beloeb': 7500, //oerer
                 'Beskrivelse': 'Brugsen Sulsted',
+                'Konto': 'Lonkonto',
                 'Kategorier': [
                     { 'Kategori': 'Mad', 'Beloeb': 7500, 'Tekst': '' }
                 ]
@@ -145,6 +217,7 @@
                 'Dato': '3/2-2017',
                 'Beloeb': 50000, //oerer
                 'Beskrivelse': 'Ebay seller',
+                'Konto': 'Lonkonto',
                 'Kategorier': [
                     { 'Kategori': 'Soren', 'Beloeb': 50000, 'Tekst': 'webcam' }
                 ]
