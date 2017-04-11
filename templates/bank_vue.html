@@ -42,7 +42,7 @@
             </div>
         </div>
         <div class="col-md-8 col-md-pull-4">
-            <table id="money_table" class="table table-bordered table-condensed">
+            <table id="money_table" class="table table-bordered table-condensed table-hover">
                 <tr><th>Dato</th><th>Konto</th><th>Beskrivelse</th><th>Kategorier</th><th>Bel&oslash;b</th><th>Saldo efter</th></tr>
                 
                 <tr is="money-line" v-for="linie in linier" v-bind:linie="linie" :key="linie.Id" v-on:selected="setSelected"> </tr>
@@ -52,17 +52,9 @@
     <div class="modal fade bs-example-modal-lg" tabindex="-1" id="editModal" role="dialog" aria-labelledby="mySmallModalLabel">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">Modal title</h4>
-                </div>
-                <div class="modal-body">
-                    <money-line-edit :linie="selected" :kategorier="kategorier"></money-line-edit>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
+ 
+                    <money-line-edit :linie="selected" :kategorier="kategorier" v-on:update_selected="updateSelected"></money-line-edit>
+               
             </div>
         </div>
     </div>
@@ -85,29 +77,45 @@
 
 <template id="money_line_edit">
     <div v-if="linie">
-        <h1 >{{linie.Beskrivelse}}</h1>
-        <table id="money_table" class="table table-bordered table-condensed">
-            <tr><th>Kategori</th><th>Bel&oslash;b</th><th>Kommentar</th><th>&nbsp;</th></tr>
-            <tr v-for="kategori in kategori_linier">
-                <td>{{kategori.Kategori}}</td>
-                <td><input v-model="kategori.Beloeb" ></td>
-                <td><input v-model="kategori.Tekst" placeholder="kommentar"></td>
-                <th>&nbsp;</th>
-            </tr>
 
-            <tr >
-                <td><input v-model="ny_kategori" placeholder="Ny kategori"></td>
-                <td><input v-model="ny_beloeb"></td>
-                <td><input v-model="ny_tekst" placeholder="kommentar"></td>
-                <td><button class="btn btn-sm" v-on:click="tilfoejKategori">Tilf&oslash;j kategori</button></td>
-            </tr>
-            <tr>
-                <td>Saldo</td>
-                <td>{{saldo}}</td>
-                <td>{{saldo_beskrivelse}}</td>
-                <td>{{(saldo / 100).toFixed(2)}} kr.</td>
-            </tr>
-        </table>
+
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">{{linie.Dato}} - {{linie.Beskrivelse}}</h4>
+        </div>
+        <div class="modal-body">
+
+
+            <table id="money_table" class="table table-bordered table-condensed">
+                <tr><th>Kategori</th><th>Bel&oslash;b</th><th>&nbsp;</th><th>Kommentar</th><th>&nbsp;</th></tr>
+                <tr v-for="kategori in kategori_linier">
+                    <td>{{kategori.Kategori}}</td>
+                    <td><input v-model="kategori.Beloeb" style="text-align:right;"><button v-if="! saldo_ok" v-on:click="kategori.Beloeb = kategori.Beloeb + saldo_diff"><span class="glyphicon glyphicon-flag" aria-hidden="true"></span></button></td>
+                    <td style="text-align:right;"><div v-if="kategori.Beloeb != 0 && kategori.Beloeb != null">{{(kategori.Beloeb / 100).toFixed(2)}} kr.</div></td>
+                    <td><input v-model="kategori.Tekst" placeholder="kommentar"></td>
+                    <th>&nbsp;</th>
+                </tr>
+
+                <tr>
+                    <td><input v-model="ny_kategori" placeholder="Ny kategori"></td>
+                    <td><input v-model="ny_beloeb" style="text-align:right;"></td>
+                    <td style="text-align:right;">{{(ny_beloeb / 100).toFixed(2)}} kr.</td>
+                    <td><input v-model="ny_tekst" placeholder="kommentar"></td>
+                    <td><button class="btn btn-sm" v-on:click="tilfoejKategori">Tilf&oslash;j kategori</button></td>
+                </tr>
+                <tr v-bind:class="{ warning: ! saldo_ok }">
+                    <td>Saldo</td>
+                    <td class="text-right">{{saldo}}</td>
+                    <td style="text-align:right;">{{(saldo / 100).toFixed(2)}} kr.</td>
+                    <td v-bind:class="{ danger: ! saldo_ok }">{{saldo_beskrivelse}}</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" v-bind:disabled="! saldo_ok" v-on:click="gem_kategorier">Gem</button>
+        </div>
     </div>
 </template>
                     {% endraw %}
@@ -146,15 +154,20 @@
                 }
                 return saldo;
             },
+            saldo_ok: function () {
+                return this.saldo == this.linie.Beloeb;
+            },
+            saldo_diff: function () {
+                return this.linie.Beloeb - this.saldo;
+            },
             saldo_beskrivelse: function () {
                 if (this.saldo > this.linie.Beloeb) {
-                    return "(For stort)";
+                    return "(" + ((this.saldo / 100).toFixed(2)) + " kr for meget)";
                 }
                 if (this.saldo < this.linie.Beloeb) {
-                    return "(For lille)";
+                    return "(" + ((this.saldo / 100).toFixed(2)) + " kr for lidt)";
                 }
                 return "";
-
             }
         },
         watch: {
@@ -185,6 +198,12 @@
                         this.kategori_linier.push({ Kategori: kat, Beloeb: null, Tekst: null });
                     }
                 }
+            },
+            gem_kategorier: function () {
+                console.log('the end!');
+                var res = this.kategori_linier.filter(l => l.Beloeb != null)
+                this.$emit('update_selected', res);
+                $('#editModal').modal('hide');
             }
         }
     })
@@ -233,6 +252,10 @@
                 var filtered = this.linier.filter(item => item.Id == id)
                 this.selected = filtered[0];
                 $('#editModal').modal('show');
+            },
+            updateSelected: function (obj) {
+                this.selected.Kategorier = obj;
+                console.log(obj);
             }
         }
     });
