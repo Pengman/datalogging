@@ -161,11 +161,11 @@
                 return this.linie.Beloeb - this.saldo;
             },
             saldo_beskrivelse: function () {
-                if (this.saldo > this.linie.Beloeb) {
-                    return "(" + ((this.saldo / 100).toFixed(2)) + " kr for meget)";
+                if (this.saldo_diff <0 ) {
+                    return "(" + ((Math.abs( this.saldo_diff) / 100).toFixed(2)) + " kr for meget)";
                 }
-                if (this.saldo < this.linie.Beloeb) {
-                    return "(" + ((this.saldo / 100).toFixed(2)) + " kr for lidt)";
+                if (this.saldo_diff > 0) {
+                    return "(" + ((Math.abs(this.saldo_diff) / 100).toFixed(2)) + " kr for lidt)";
                 }
                 return "";
             }
