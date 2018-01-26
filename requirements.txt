@@ -1,1 +1,4 @@
 flask 
+peewee 
+flask_admin 
+wtf-peewee 
