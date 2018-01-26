@@ -58,3 +58,5 @@ def bank2():
         app.logging.debug("@return")
     else:
         return render_template('bank_vue.html')
+
+app.run(debug = True)
