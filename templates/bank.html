@@ -9,7 +9,7 @@
 <div class="container">
 
   <div class="row">
-    <div class="col-md-5 col-md-offset-1">
+    <div class="col-md-5 col-md-offset-1 col-sm-10">
         <div class="form-group">
            <div class="input-group date" id="datetimepicker7" data-target-input="nearest">
                 <input type="text" class="form-control datetimepicker-input"
@@ -20,7 +20,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-5 col-sm-10 ">
         <div class="form-group">
            <div class="input-group date" id="datetimepicker8" data-target-input="nearest">
                 <input type="text" class="form-control datetimepicker-input"
@@ -30,6 +30,9 @@
                 </span>
             </div>
         </div>
+    </div>
+    <div class="col-sm-1">
+      <button class="btn btn-default">S&oslash;g</button>
     </div>
   </div>
 
@@ -73,7 +76,7 @@
 	  <td>Rest</td>
 	  <td class="kategori_total">Bel&oslash;b</td>
 	    <td>
-	      <button class="btn btn-primary btn-sm">
+	      <button class="btn btn-primary btn-sm gem_kategorier_btn">
 		<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>Gem kategorier</button>
 	    </td>
 	    <td>&nbsp;</td>
@@ -107,6 +110,12 @@ $( clicked_row ).clone().insertAfter( clicked_row ).find( ':input' ).val( '' );
 
 //console.log(a);
 })
+
+.on('click','gem_kategorier_btn', function(a)
+{
+var linie_tr = $(this).parents('tr').nextUntil('.linie');
+})
+
 .on('input','.kategori_beloeb', function(a){
 console.log('beloeb changed to ' + $(this).val());
 var linie_belob = parseFloat($(this).parents('tr').prevAll('.linie').find('.linie_beloeb').text());
